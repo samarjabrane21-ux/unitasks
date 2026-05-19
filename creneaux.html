@@ -1,0 +1,582 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>UniTasks - Créneaux de Tutorat</title>
+  <link rel="stylesheet" href="style.css">
+  <link rel="icon" href="logo.svg">
+  <style>
+    .creneaux-container { max-width: 1200px; margin: auto; padding: 2rem; }
+    
+    .section-header { display: flex; justify-content: space-between; align-items: center; margin-bottom: 2rem; }
+    
+    .btn-create {
+      padding: 0.8rem 1.8rem;
+      background: var(--primary);
+      color: white;
+      border: none;
+      border-radius: 12px;
+      font-weight: 700;
+      cursor: pointer;
+      box-shadow: 0 4px 14px rgba(108, 99, 255, 0.3);
+      transition: var(--transition);
+    }
+    .btn-create:hover { transform: translateY(-2px); box-shadow: 0 6px 20px rgba(108, 99, 255, 0.4); }
+
+    .grid-slots { display: grid; grid-template-columns: repeat(auto-fill, minmax(320px, 1fr)); gap: 1.5rem; margin-bottom: 3rem; }
+
+    .slot-card {
+      background: var(--card-bg);
+      border-radius: 20px;
+      padding: 1.5rem;
+      box-shadow: var(--shadow-sm);
+      border-left: 6px solid var(--primary);
+      transition: var(--transition);
+      position: relative;
+    }
+    .slot-card:hover { transform: translateY(-4px); box-shadow: var(--shadow); }
+    .slot-card.reserved { border-left-color: #cdb4db; }
+    .slot-card.completed { border-left-color: #b7e4c7; opacity: 0.85; }
+
+    body:has(#theme-switch:checked) .slot-card {
+      background: #2e384d;
+      color: #f1f1f1;
+    }
+
+    .slot-subject { font-size: 1.25rem; font-weight: 800; margin-bottom: 0.5rem; }
+    .slot-info { font-size: 0.9rem; margin-bottom: 0.4rem; color: var(--text-light); display: flex; align-items: center; gap: 0.5rem; }
+    body:has(#theme-switch:checked) .slot-info { color: #cbd5e1; }
+    .slot-status { font-size: 0.75rem; padding: 0.3rem 0.8rem; border-radius: 20px; font-weight: 700; width: fit-content; margin-top: 0.8rem; }
+    .status-available { background: #e0f2fe; color: #0369a1; }
+    .status-reserved { background: #fef3c7; color: #b45309; }
+    .status-completed { background: #dcfce7; color: #15803d; }
+
+    .slot-actions { display: flex; gap: 0.8rem; margin-top: 1.2rem; flex-wrap: wrap; }
+    .btn-action {
+      flex: 1;
+      padding: 0.5rem 1rem;
+      border-radius: 8px;
+      font-size: 0.85rem;
+      font-weight: 600;
+      border: none;
+      cursor: pointer;
+      text-align: center;
+      text-decoration: none;
+      transition: var(--transition);
+    }
+    .btn-primary-action { background: var(--primary); color: white; }
+    .btn-primary-action:hover { opacity: 0.9; }
+    .btn-danger-action { background: #fee2e2; color: #dc2626; }
+    .btn-danger-action:hover { background: #fecaca; }
+    .btn-secondary-action { background: #f3f4f6; color: #374151; }
+    .btn-secondary-action:hover { background: #e5e7eb; }
+    body:has(#theme-switch:checked) .btn-secondary-action { background: #374151; color: #f1f1f1; }
+    body:has(#theme-switch:checked) .btn-secondary-action:hover { background: #4b5563; }
+
+    /* Modal styles */
+    .modal { display: none; position: fixed; inset: 0; background: rgba(0,0,0,0.5); z-index: 999; align-items: center; justify-content: center; backdrop-filter: blur(4px); }
+    .modal.active { display: flex; }
+    .modal-content { background: var(--card-bg); border-radius: 24px; padding: 2.5rem; width: 100%; max-width: 500px; box-shadow: var(--shadow); position: relative; animation: modalFade 0.3s ease; }
+    body:has(#theme-switch:checked) .modal-content { background: #2e384d; color: #f1f1f1; }
+    @keyframes modalFade { from { opacity: 0; transform: translateY(-20px); } to { opacity: 1; transform: translateY(0); } }
+
+    .modal-content h3 { font-size: 1.4rem; font-weight: 800; margin-bottom: 1.5rem; color: var(--primary); }
+    .modal-content label { display: block; font-size: 0.85rem; font-weight: 600; margin: 0.8rem 0 0.3rem; }
+    .modal-content input, .modal-content select { width: 100%; padding: 0.75rem 1rem; border: 1.5px solid #e5e7eb; border-radius: 10px; font-size: 0.92rem; outline: none; }
+    body:has(#theme-switch:checked) .modal-content input, body:has(#theme-switch:checked) .modal-content select { background: #1b2430; border-color: #4b5563; color: #f1f1f1; }
+    .modal-content input:focus { border-color: var(--primary); }
+
+    .modal-btns { display: flex; gap: 1rem; margin-top: 1.8rem; }
+    .btn-save { flex: 1; padding: 0.85rem; background: var(--primary); color: white; border: none; border-radius: 12px; font-weight: 700; cursor: pointer; }
+    .btn-cancel { flex: 1; padding: 0.85rem; background: #f3f4f6; color: #374151; border: none; border-radius: 12px; font-weight: 700; cursor: pointer; }
+    body:has(#theme-switch:checked) .btn-cancel { background: #374151; color: #f1f1f1; }
+
+    .file-input-wrapper { position: relative; margin-top: 0.5rem; }
+    .file-label { display: block; padding: 0.8rem 1rem; background: #f9fafb; border: 1.5px dashed #d1d5db; border-radius: 10px; text-align: center; cursor: pointer; font-size: 0.9rem; color: #6b7280; font-weight: 500; transition: var(--transition); }
+    .file-label:hover { border-color: var(--primary); background: #f0eeff; color: var(--primary); }
+    body:has(#theme-switch:checked) .file-label { background: #1b2430; border-color: #4b5563; color: #9ca3af; }
+    body:has(#theme-switch:checked) .file-label:hover { border-color: var(--primary); background: #232c3f; }
+  </style>
+</head>
+<body>
+  <header>
+    <div class="logo">🎓 UniTasks</div>
+    <nav>
+      <ul>
+        <li><a href="index.html">Dashboard</a></li>
+        <li><a href="taches.html">Tâches</a></li>
+        <li><a href="calendrier.html">Calendrier</a></li>
+        <li><a href="stats.html">Stats</a></li>
+        <li><a href="creneaux.html" class="active">Créneaux</a></li>
+        <li><a href="plans.html">Plans de révision</a></li>
+        <li><a href="fichiers.html">Fichiers</a></li>
+        <li><a href="notes.html">Notes</a></li>
+        <li><a href="profil.html">Profil</a></li>
+        <li><a href="contact.html">Contact</a></li>
+      </ul>
+    </nav>
+    <input type="checkbox" id="theme-switch" hidden>
+    <label for="theme-switch" class="theme-toggle">
+      <span class="sun">☀️</span><span class="moon">🌙</span>
+    </label>
+  </header>
+
+  <main class="creneaux-container">
+    <div class="section-header">
+      <div>
+        <h1 class="page-title" style="margin-top:0; text-align:left;">📅 Créneaux de Tutorat</h1>
+        <p class="page-subtitle" style="margin-bottom:0; text-align:left;" id="pageSubtitle">Planifiez ou réservez vos séances de tutorat personnalisé.</p>
+      </div>
+      <button class="btn-create" id="btnPublish" style="display:none;" onclick="openPublishModal()">➕ Publier un créneau</button>
+    </div>
+
+    <!-- Interface Enseignant -->
+    <div id="teacherView" style="display:none;">
+      <h2 style="font-size:1.4rem; font-weight:800; margin-bottom:1.2rem;">Mes créneaux de tutorat</h2>
+      <div class="grid-slots" id="teacherSlotsGrid">
+        <!-- Rempli dynamiquement -->
+      </div>
+    </div>
+
+    <!-- Interface Étudiant -->
+    <div id="studentView" style="display:none;">
+      <h2 style="font-size:1.4rem; font-weight:800; margin-top:2rem; margin-bottom:1.2rem;">Créneaux disponibles</h2>
+      <div class="grid-slots" id="availableSlotsGrid">
+        <!-- Rempli dynamiquement -->
+      </div>
+
+      <h2 style="font-size:1.4rem; font-weight:800; margin-top:3rem; margin-bottom:1.2rem;">Mes réservations</h2>
+      <div class="grid-slots" id="studentReservationsGrid">
+        <!-- Rempli dynamiquement -->
+      </div>
+    </div>
+  </main>
+
+  <!-- Modal Publication Créneau (Enseignant) -->
+  <div class="modal" id="publishModal">
+    <div class="modal-content">
+      <h3>📅 Publier un créneau de tutorat</h3>
+      <label>Matière</label>
+      <input type="text" id="pubSubject" placeholder="ex: Mathématiques, Algorithmique">
+      
+      <label>Date et heure</label>
+      <input type="datetime-local" id="pubDateTime">
+      
+      <label>Lien de visioconférence (Zoom, Meet, etc.)</label>
+      <input type="url" id="pubZoomLink" placeholder="https://meet.google.com/abc-defg-hij">
+
+      <div class="modal-btns">
+        <button class="btn-cancel" onclick="closePublishModal()">Annuler</button>
+        <button class="btn-save" id="btnPublishSlot" onclick="savePublishSlot()">💾 Publier le créneau</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- Modal Réservation Créneau (Étudiant) -->
+  <div class="modal" id="reserveModal">
+    <div class="modal-content">
+      <h3>🔒 Réserver ce créneau</h3>
+      <p style="font-size:0.9rem; margin-bottom:1rem; opacity:0.85;">Vous réservez une séance pour la matière <strong id="resSubjectLabel">...</strong>.</p>
+      
+      <label>Joindre un énoncé d'exercice ou une description (optionnel)</label>
+      <div class="file-input-wrapper">
+        <label for="resFile" class="file-label" id="fileLabelText">📁 Sélectionner un fichier (PDF, Image, Word)</label>
+        <input type="file" id="resFile" style="display:none;" onchange="handleFileSelect(this)">
+      </div>
+
+      <div class="modal-btns">
+        <button class="btn-cancel" onclick="closeReserveModal()">Annuler</button>
+        <button class="btn-save" id="btnConfirmReservation" onclick="confirmReservation()">💾 Confirmer la réservation</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- Modal Compléter / Charger Plan (Enseignant) -->
+  <div class="modal" id="completeModal">
+    <div class="modal-content">
+      <h3>✅ Clôturer la séance de tutorat</h3>
+      <p style="font-size:0.9rem; margin-bottom:1rem; opacity:0.85;">Ajoutez un plan de révision ou document de correction pour l'étudiant.</p>
+      
+      <label>Téléverser le plan de révision PDF</label>
+      <div class="file-input-wrapper">
+        <label for="completeFile" class="file-label" id="completeFileLabelText">📁 Sélectionner le plan de révision</label>
+        <input type="file" id="completeFile" style="display:none;" onchange="handleCompleteFileSelect(this)">
+      </div>
+
+      <div class="modal-btns">
+        <button class="btn-cancel" onclick="closeCompleteModal()">Annuler</button>
+        <button class="btn-save" id="btnConfirmCompletion" onclick="confirmCompletion()">💾 Clôturer la séance</button>
+      </div>
+    </div>
+  </div>
+
+  <footer class="modern-footer">
+    <div class="footer-center">
+      <h3>🎓 UniTasks</h3>
+      <p class="footer-main-text">Ton espace intelligent pour organiser tes études.</p>
+    </div>
+    <div class="footer-bottom">© 2025 <strong>UniTasks</strong></div>
+  </footer>
+
+  <script src="api.js"></script>
+  <script src="app.js"></script>
+  <script>
+    let activeSlotId = null;
+    let selectedExerciseFile = null;
+    let selectedPlanFile = null;
+
+    document.addEventListener('DOMContentLoaded', async () => {
+      const user = AuthAPI.getUser();
+      if (!user) {
+        window.location.href = 'login.html';
+        return;
+      }
+
+      // Adapter l'interface selon le rôle
+      if (user.role === 'enseignant') {
+        document.getElementById('pageSubtitle').textContent = "Créez vos créneaux de soutien et suivez vos réservations d'étudiants.";
+        document.getElementById('btnPublish').style.display = 'block';
+        document.getElementById('teacherView').style.display = 'block';
+        loadTeacherSlots();
+      } else {
+        document.getElementById('pageSubtitle').textContent = "Réservez des créneaux de tutorat avec vos enseignants et téléchargez vos plans de révision.";
+        document.getElementById('studentView').style.display = 'block';
+        loadStudentSlots();
+      }
+    });
+
+    // ── FONCTIONS ENSEIGNANT ──
+
+    async function loadTeacherSlots() {
+      const user = AuthAPI.getUser();
+      const grid = document.getElementById('teacherSlotsGrid');
+      grid.innerHTML = '<div class="empty-state">Chargement des créneaux...</div>';
+
+      try {
+        const slots = await CreneauxAPI.getAll(user.id, 'enseignant');
+        if (!slots || slots.length === 0) {
+          grid.innerHTML = '<div class="empty-state">Aucun créneau publié pour le moment.</div>';
+          return;
+        }
+
+        grid.innerHTML = slots.map(slot => {
+          let statusText = 'Disponible';
+          let statusClass = 'status-available';
+          let cardClass = '';
+          let actionsHtml = `<button class="btn-action btn-danger-action" onclick="deleteSlot(${slot.id})">🗑️ Annuler</button>`;
+
+          if (slot.status === 'reserved') {
+            statusText = `Réservé par @${slot.student_name}`;
+            statusClass = 'status-reserved';
+            cardClass = 'reserved';
+            actionsHtml = `
+              ${slot.exercise_path ? `<a href="uploads/${slot.exercise_path}" class="btn-action btn-secondary-action" target="_blank">📄 Exercice</a>` : ''}
+              <button class="btn-action btn-primary-action" onclick="openCompleteModal(${slot.id})">✅ Clôturer</button>
+              <button class="btn-action btn-danger-action" onclick="cancelReservation(${slot.id})">❌ Libérer</button>
+            `;
+          } else if (slot.status === 'completed') {
+            statusText = 'Séance terminée';
+            statusClass = 'status-completed';
+            cardClass = 'completed';
+            actionsHtml = `
+              ${slot.plan_path ? `<a href="uploads/${slot.plan_path}" class="btn-action btn-secondary-action" target="_blank">⬇️ Plan envoyé</a>` : ''}
+            `;
+          }
+
+          const dateFormatted = new Date(slot.date_time).toLocaleString('fr-FR', {
+            weekday: 'long', day: 'numeric', month: 'long', hour: '2-digit', minute: '2-digit'
+          });
+
+          return `
+            <div class="slot-card ${cardClass}">
+              <div class="slot-subject">${slot.subject}</div>
+              <div class="slot-info">📅 ${dateFormatted}</div>
+              ${slot.zoom_link ? `<div class="slot-info">🔗 <a href="${slot.zoom_link}" target="_blank" style="color:var(--primary); font-weight:600;">Lien visio</a></div>` : ''}
+              <div class="slot-status ${statusClass}">${statusText}</div>
+              <div class="slot-actions">
+                ${actionsHtml}
+              </div>
+            </div>
+          `;
+        }).join('');
+      } catch (err) {
+        grid.innerHTML = '<div class="empty-state">Erreur de chargement. Veuillez vérifier la connexion BDD.</div>';
+      }
+    }
+
+    function openPublishModal() {
+      document.getElementById('publishModal').classList.add('active');
+    }
+    function closePublishModal() {
+      document.getElementById('publishModal').classList.remove('active');
+    }
+
+    async function savePublishSlot() {
+      const subject = document.getElementById('pubSubject').value.trim();
+      const dateTime = document.getElementById('pubDateTime').value;
+      const zoomLink = document.getElementById('pubZoomLink').value.trim();
+      const user = AuthAPI.getUser();
+
+      if (!subject || !dateTime) {
+        alert('Veuillez remplir au moins la matière et la date/heure.');
+        return;
+      }
+
+      const btn = document.getElementById('btnPublishSlot');
+      const originalText = btn.innerHTML;
+      btn.disabled = true;
+      btn.innerHTML = '<span class="spinner"></span> Publication...';
+
+      try {
+        const res = await CreneauxAPI.create({
+          teacher_id: user.id,
+          subject,
+          date_time: dateTime,
+          zoom_link: zoomLink
+        });
+
+        if (res.success) {
+          closePublishModal();
+          loadTeacherSlots();
+        } else {
+          alert(res.error || 'Erreur lors de la publication.');
+        }
+      } catch (err) {
+        alert('Une erreur est survenue.');
+      } finally {
+        btn.disabled = false;
+        btn.innerHTML = originalText;
+      }
+    }
+
+    async function deleteSlot(id) {
+      if (confirm('Voulez-vous supprimer ce créneau de tutorat ?')) {
+        const res = await CreneauxAPI.delete(id);
+        if (res.success) {
+          loadTeacherSlots();
+        } else {
+          alert('Erreur lors de la suppression.');
+        }
+      }
+    }
+
+    async function cancelReservation(id) {
+      if (confirm('Libérer ce créneau ? L\'étudiant sera retiré.')) {
+        const res = await CreneauxAPI.cancel(id);
+        if (res.success) {
+          loadTeacherSlots();
+        } else {
+          alert('Erreur.');
+        }
+      }
+    }
+
+    function openCompleteModal(id) {
+      activeSlotId = id;
+      selectedPlanFile = null;
+      document.getElementById('completeFileLabelText').textContent = '📁 Sélectionner le plan de révision';
+      document.getElementById('completeModal').classList.add('active');
+    }
+    function closeCompleteModal() {
+      document.getElementById('completeModal').classList.remove('active');
+    }
+
+    function handleCompleteFileSelect(input) {
+      if (input.files.length > 0) {
+        selectedPlanFile = input.files[0];
+        document.getElementById('completeFileLabelText').textContent = '📄 ' + selectedPlanFile.name;
+      }
+    }
+
+    async function confirmCompletion() {
+      if (!selectedPlanFile) {
+        alert('Veuillez joindre le plan de révision en PDF pour clôturer la séance.');
+        return;
+      }
+
+      const btn = document.getElementById('btnConfirmCompletion');
+      const originalText = btn.innerHTML;
+      btn.disabled = true;
+      btn.innerHTML = '<span class="spinner"></span> Clôture en cours...';
+
+      try {
+        // 1. Upload du plan de révision
+        const uploadRes = await UploadAPI.upload(selectedPlanFile);
+        if (!uploadRes.success) {
+          alert('Échec du téléversement du plan : ' + uploadRes.error);
+          return;
+        }
+
+        // 2. Mettre à jour le créneau en completed
+        const res = await CreneauxAPI.update(activeSlotId, {
+          plan_path: uploadRes.fileName,
+          status: 'completed'
+        });
+
+        if (res.success) {
+          closeCompleteModal();
+          loadTeacherSlots();
+        } else {
+          alert('Erreur lors de la clôture.');
+        }
+      } catch (err) {
+        alert('Une erreur est survenue.');
+      } finally {
+        btn.disabled = false;
+        btn.innerHTML = originalText;
+      }
+    }
+
+
+    // ── FONCTIONS ETUDIANT ──
+
+    async function loadStudentSlots() {
+      const user = AuthAPI.getUser();
+      const availGrid = document.getElementById('availableSlotsGrid');
+      const resGrid = document.getElementById('studentReservationsGrid');
+
+      availGrid.innerHTML = '<div class="empty-state">Chargement...</div>';
+      resGrid.innerHTML = '<div class="empty-state">Chargement...</div>';
+
+      try {
+        const slots = await CreneauxAPI.getAll(user.id, 'etudiant');
+
+        // Filtrer disponibles vs mes réservations
+        const available = slots.filter(s => s.status === 'available');
+        const reservations = slots.filter(s => s.student_id == user.id);
+
+        // Remplir Disponibles
+        if (available.length === 0) {
+          availGrid.innerHTML = '<div class="empty-state">Aucun créneau de tutorat disponible en ce moment.</div>';
+        } else {
+          availGrid.innerHTML = available.map(slot => {
+            const dateFormatted = new Date(slot.date_time).toLocaleString('fr-FR', {
+              weekday: 'long', day: 'numeric', month: 'long', hour: '2-digit', minute: '2-digit'
+            });
+            return `
+              <div class="slot-card">
+                <div class="slot-subject">${slot.subject}</div>
+                <div class="slot-info">👨‍🏫 Enseignant : @${slot.teacher_name}</div>
+                <div class="slot-info">📅 ${dateFormatted}</div>
+                <div class="slot-actions">
+                  <button class="btn-action btn-primary-action" onclick="openReserveModal(${slot.id}, '${slot.subject.replace(/'/g, "\\'")}')">🔒 Réserver</button>
+                </div>
+              </div>
+            `;
+          }).join('');
+        }
+
+        // Remplir Réservations
+        if (reservations.length === 0) {
+          resGrid.innerHTML = '<div class="empty-state">Vous n\'avez aucun créneau de tutorat réservé.</div>';
+        } else {
+          resGrid.innerHTML = reservations.map(slot => {
+            const dateFormatted = new Date(slot.date_time).toLocaleString('fr-FR', {
+              weekday: 'long', day: 'numeric', month: 'long', hour: '2-digit', minute: '2-digit'
+            });
+
+            let statusText = 'Séance réservée';
+            let statusClass = 'status-reserved';
+            let cardClass = 'reserved';
+            let actionsHtml = `
+              <button class="btn-action btn-danger-action" onclick="cancelStudentReservation(${slot.id})">❌ Annuler réservation</button>
+            `;
+
+            if (slot.status === 'completed') {
+              statusText = 'Séance effectuée';
+              statusClass = 'status-completed';
+              cardClass = 'completed';
+              actionsHtml = `
+                ${slot.plan_path ? `<a href="uploads/${slot.plan_path}" class="btn-action btn-primary-action" target="_blank">⬇️ Télécharger mon plan</a>` : '<span style="font-size:0.8rem; color:#888;">Plan non disponible</span>'}
+              `;
+            }
+
+            return `
+              <div class="slot-card ${cardClass}">
+                <div class="slot-subject">${slot.subject}</div>
+                <div class="slot-info">👨‍🏫 Enseignant : @${slot.teacher_name}</div>
+                <div class="slot-info">📅 ${dateFormatted}</div>
+                ${slot.zoom_link && slot.status !== 'completed' ? `<div class="slot-info">🔗 Visio : <a href="${slot.zoom_link}" target="_blank" style="color:var(--primary); font-weight:600;">Rejoindre la visio</a></div>` : ''}
+                <div class="slot-status ${statusClass}">${statusText}</div>
+                <div class="slot-actions">
+                  ${actionsHtml}
+                </div>
+              </div>
+            `;
+          }).join('');
+        }
+      } catch (err) {
+        availGrid.innerHTML = '<div class="empty-state">Erreur de chargement de la base de données.</div>';
+        resGrid.innerHTML = '<div class="empty-state">Erreur de chargement.</div>';
+      }
+    }
+
+    function openReserveModal(id, subject) {
+      activeSlotId = id;
+      selectedExerciseFile = null;
+      document.getElementById('resSubjectLabel').textContent = subject;
+      document.getElementById('fileLabelText').textContent = '📁 Sélectionner un fichier (PDF, Image, Word)';
+      document.getElementById('reserveModal').classList.add('active');
+    }
+    function closeReserveModal() {
+      document.getElementById('reserveModal').classList.remove('active');
+    }
+
+    function handleFileSelect(input) {
+      if (input.files.length > 0) {
+        selectedExerciseFile = input.files[0];
+        document.getElementById('fileLabelText').textContent = '📄 ' + selectedExerciseFile.name;
+      }
+    }
+
+    async function confirmReservation() {
+      const user = AuthAPI.getUser();
+      let exercisePath = null;
+
+      const btn = document.getElementById('btnConfirmReservation');
+      const originalText = btn.innerHTML;
+      btn.disabled = true;
+      btn.innerHTML = '<span class="spinner"></span> Réservation...';
+
+      try {
+        // 1. Si un fichier a été sélectionné, le téléverser
+        if (selectedExerciseFile) {
+          const uploadRes = await UploadAPI.upload(selectedExerciseFile);
+          if (uploadRes.success) {
+            exercisePath = uploadRes.fileName;
+          } else {
+            alert('Échec de l\'envoi du fichier d\'exercice : ' + uploadRes.error);
+            return;
+          }
+        }
+
+        // 2. Confirmer la réservation
+        const res = await CreneauxAPI.reserve(activeSlotId, user.id, exercisePath);
+        if (res.success) {
+          closeReserveModal();
+          loadStudentSlots();
+        } else {
+          alert('Erreur lors de la réservation.');
+        }
+      } catch (err) {
+        alert('Une erreur est survenue.');
+      } finally {
+        btn.disabled = false;
+        btn.innerHTML = originalText;
+      }
+    }
+
+    async function cancelStudentReservation(id) {
+      if (confirm('Voulez-vous annuler votre réservation pour ce créneau ?')) {
+        const res = await CreneauxAPI.cancel(id);
+        if (res.success) {
+          loadStudentSlots();
+        } else {
+          alert('Erreur lors de l\'annulation.');
+        }
+      }
+    }
+  </script>
+</body>
+</html>

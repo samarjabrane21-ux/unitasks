@@ -1,0 +1,270 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>UniTasks - Contact & Support</title>
+    <link rel="stylesheet" href="style.css">
+    <link rel="icon" href="logo.png" type="image/png">
+    <style>
+
+        [data-theme="dark"] {
+            --primary: #b794f4;
+            --primary-light: #d6bcfa;
+            --accent: #553c9a;
+            --bg: #121212;
+            --card-bg: #1e1e1e;
+            --text: #e2e8f0;
+            --text-light: #94a3b8;
+            --border: #334155;
+            --success: #34d399;
+        }
+        .contact {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 4rem;
+            align-items: start;
+        }
+
+        .contact h1 {
+            font-size: 2.8rem;
+            color: var(--text);
+            margin-bottom: 1rem;
+        }
+
+        .contact p {
+            font-size: 1.2rem;
+            color: var(--text-light);
+            margin-bottom: 2rem;
+        }
+
+        .contact-form {
+            background: var(--card-bg);
+            padding: 2.5rem;
+            border-radius: 20px;
+            box-shadow: 0 10px 40px rgba(0,0,0,0.06);
+        }
+
+        .form-group {
+            margin-bottom: 1.5rem;
+        }
+
+        .form-group label {
+            display: block;
+            margin-bottom: 0.5rem;
+            font-weight: 500;
+            color: var(--text);
+        }
+
+        .form-group input,
+        .form-group textarea {
+            width: 100%;
+            padding: 1rem;
+            border: 1px solid var(--border);
+            border-radius: 12px;
+            background: var(--bg);
+            color: var(--text);
+            font-size: 1rem;
+            transition: border 0.3s;
+        }
+
+        .form-group input:focus,
+        .form-group textarea:focus {
+            outline: none;
+            border-color: var(--primary);
+            box-shadow: 0 0 0 3px rgba(107, 70, 193, 0.2);
+        }
+
+        .form-group textarea {
+            min-height: 160px;
+            resize: vertical;
+        }
+
+        .btn {
+            background: var(--primary);
+            color: white;
+            border: none;
+            padding: 1rem 2rem;
+            border-radius: 12px;
+            font-size: 1.1rem;
+            font-weight: 600;
+            cursor: pointer;
+            transition: background 0.3s;
+        }
+
+        .btn:hover {
+            background: var(--primary-light);
+        }
+
+        .contact-info {
+            display: flex;
+            flex-direction: column;
+            gap: 2rem;
+        }
+
+        .info-card {
+            background: var(--card-bg);
+            padding: 2rem;
+            border-radius: 16px;
+            box-shadow: 0 8px 30px rgba(0,0,0,0.06);
+        }
+
+        .info-card h3 {
+            color: var(--primary);
+            margin-bottom: 1rem;
+            font-size: 1.5rem;
+        }
+
+        .info-card p, .info-card li {
+            color: var(--text-light);
+            margin: 0.5rem 0;
+        }
+
+        .info-card ul {
+            list-style: none;
+            padding: 0;
+        }
+
+        .info-card li::before {
+            content: "→";
+            color: var(--primary);
+            margin-right: 0.8rem;
+        }
+
+        .success-message {
+            background: var(--success);
+            color: white;
+            padding: 1rem 1.5rem;
+            border-radius: 12px;
+            margin-top: 1.5rem;
+            display: none;
+            align-items: center;
+            gap: 0.8rem;
+        }
+
+        footer {
+            text-align: center;
+            padding: 3rem;
+            color: var(--text-light);
+            font-size: 0.95rem;
+            margin-top: 5rem;
+            border-top: 1px solid var(--border);
+        }
+
+        @media (max-width: 968px) {
+            .contact {
+                grid-template-columns: 1fr;
+            }
+            header {
+                flex-direction: column;
+                gap: 1rem;
+                padding: 1.5rem;
+            }
+            nav ul {
+                gap: 1.5rem;
+                flex-wrap: wrap;
+                justify-content: center;
+            }
+        }
+    </style>
+</head>
+<body>
+
+    <header>
+        <div class="logo">🎓 UniTasks</div>
+            <nav>
+      <ul>
+        <li><a href="index.html">Dashboard</a></li>
+        <li><a href="taches.html">Tâches</a></li>
+        <li><a href="calendrier.html">Calendrier</a></li>
+        <li><a href="stats.html">Stats</a></li>
+        <li><a href="creneaux.html">Créneaux</a></li>
+        <li><a href="plans.html">Plans de révision</a></li>
+        <li><a href="fichiers.html">Fichiers</a></li>
+        <li><a href="notes.html">Notes</a></li>
+        <li><a href="profil.html">Profil</a></li>
+        <li><a href="contact.html" class="active">Contact</a></li>
+      </ul>
+    </nav>
+        <input type="checkbox" id="theme-switch" hidden>
+        <label for="theme-switch" class="theme-toggle">
+            <span class="sun">☀️</span>
+            <span class="moon">🌙</span>
+        </label>
+    </header>
+
+    <main class="contact">
+        <div>
+            <h1>Contact & Support</h1>
+            <p>Une question ? Un bug ? Une suggestion d'amélioration ?<br>
+            On est là pour t'aider à tirer le meilleur d'UniTasks.</p>
+
+            <div class="contact-form">
+                <form id="contactForm" id="contactForm">
+                    <fieldset style="border: none; padding: 0; margin: 0;">
+                        <legend style="display: none;"></legend> <!-- legend caché pour accessibilité sans impact visuel -->
+
+                        <div class="form-group">
+                            <label for="name">Nom</label>
+                            <input type="text" id="name" required>
+                        </div>
+                        <div class="form-group">
+                            <label for="email">Email</label>
+                            <input type="email" id="email" required>
+                        </div>
+                        <div class="form-group">
+                            <label for="message">Message</label>
+                            <textarea id="message" required></textarea>
+                        </div>
+                        <button type="submit" class="btn">Envoyer le message</button>
+                    </fieldset>
+                </form>
+                <div class="success-message" id="successMsg">
+                    ✅ Message envoyé ! Nous te répondrons sous 48h.
+                </div>
+            </div>
+        </div>
+
+        <div class="contact-info">
+            <div class="info-card">
+                <h3>Support rapide</h3>
+                <ul>
+                    <li>Email :unitasks@gmail.com</li>
+                    <li>Réponse sous 24–48h</li>
+                    <li>Disponible 7j/7</li>
+                </ul>
+            </div>
+
+            <div class="info-card">
+                <h3>Rejoindre la communauté</h3>
+                <p>Discord étudiant, mises à jour, astuces...</p>
+                <p><strong>Lien d'invitation à venir</strong></p>
+            </div>
+        </div>
+    </main>
+
+    
+<footer class="modern-footer">
+  <div class="footer-center">
+
+    <h3>🎓 UniTasks</h3>
+    <p class="footer-main-text">
+      Ton espace intelligent pour organiser tes études, suivre tes tâches et rester productif chaque jour.
+    </p>
+
+    <div class="footer-features">
+      <span>📋 Organisation claire</span>
+      <span>⏱️ Productivité quotidienne</span>
+      <span>🎯 Objectifs atteints</span>
+    </div>
+
+  </div>
+
+  <div class="footer-bottom">
+    © 2025 <strong>UniTasks</strong>
+  </div>
+</footer>
+  <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+  <script src="app.js"></script>
+</body>
+</html>
