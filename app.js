@@ -1,5 +1,5 @@
 /**
- * UniTasks — app.js
+ * UniTasks — app.js partie js pour les pages html
  * Fichier JS central lié à toutes les pages HTML
  * Gère : thème, localStorage, tâches, calendrier, notes, stats, profil, notifications
  */

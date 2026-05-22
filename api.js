@@ -1,5 +1,5 @@
 // ============================================================
-//  UniTasks — api.js
+//  UniTasks — api.js 
 //  Centralise tous les appels fetch() vers le backend PHP
 //  Remplace localStorage dans app.js
 // ============================================================
@@ -231,8 +231,7 @@ const PlansAPI = {
     }
 };
 
-// ── UPLOAD ─────────────────────────────────────────────────
-const UploadAPI = {
+
     upload: async (file) => {
         const formData = new FormData();
         formData.append('file', file);
