@@ -11,7 +11,7 @@ function getCurrentUser() {
     const u = localStorage.getItem('unitasks_user');
     return u ? JSON.parse(u) : { id: 1 };
 }
-
+// etape 1
 // ── TASKS ──────────────────────────────────────────────────
 const TasksAPI = {
     getAll: async () => {
