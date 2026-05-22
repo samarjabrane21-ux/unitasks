@@ -1,0 +1,229 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>UniTasks - Notes Rapides</title>
+  <link rel="stylesheet" href="style.css">
+  <link rel="icon" href="logo.svg">
+  <style>
+    /* NOTES ULTRA-PRO 2025 — À AJOUTER DANS style.css OU ICI */
+    .notes-container {
+      max-width: 1400px;
+      margin: 0 auto;
+      padding: 2rem;
+    }
+
+    .notes-header {
+      text-align: center;
+      margin: 3rem 0 4rem;
+    }
+
+    .notes-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fill, minmax(320px, 1fr));
+      gap: 2rem;
+      margin-top: 2rem;
+    }
+
+    /* Post-it réaliste */
+    .postit {
+      background: #fff9b0;
+      min-height: 280px;
+      padding: 1.8rem 1.6rem 2.2rem;
+      border-radius: 12px;
+      box-shadow: 
+        8px 8px 20px rgba(0,0,0,0.12),
+        inset 0 -4px 8px rgba(0,0,0,0.05);
+      position: relative;
+      transform: rotate(var(--rotate, 1deg)) translateY(var(--lift, 0));
+      transition: all 0.4s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+      font-family: 'Caveat', cursive;
+      font-size: 1.35rem;
+      line-height: 1.7;
+      color: #333;
+    }
+    body.dark .postit { background: #2d2a1e; color: #e6d5a0; box-shadow: 8px 8px 20px rgba(0,0,0,0.4); }
+
+    .postit:hover {
+      transform: rotate(0deg) translateY(-12px) scale(1.04);
+      box-shadow: 
+        12px 20px 40px rgba(0,0,0,0.2),
+        inset 0 -4px 8px rgba(0,0,0,0.08);
+      z-index: 10;
+    }
+
+    /* Variantes de couleurs */
+    .postit.pink    { background: #ffd1dc; --rotate: -2deg; }
+    .postit.blue    { background: #d0f0fd; --rotate: 3deg; }
+    .postit.green   { background: #d0f8d0; --rotate: -1deg; }
+    .postit.purple  { background: #e6d6ff; --rotate: 2deg; }
+    .postit.orange  { background: #ffe0b3; --rotate: -3deg; }
+
+    body.dark .postit.pink   { background: #3a1e2c; }
+    body.dark .postit.blue   { background: #1e2e3a; }
+    body.dark .postit.green  { background: #1e3a2a; }
+    body.dark .postit.purple { background: #2e1e3a; }
+    body.dark .postit.orange { background: #3a2a1e; }
+
+    /* Zone d'écriture */
+    .postit textarea {
+      width: 100%;
+      height: 220px;
+      background: transparent;
+      border: none;
+      outline: none;
+      resize: none;
+      font: inherit;
+      color: inherit;
+      padding: 0;
+    }
+    .postit textarea::placeholder {
+      color: #888;
+      opacity: 0.7;
+    }
+
+    /* Ruban adhésif effet */
+    .postit::before {
+      content: '';
+      position: absolute;
+      top: -12px;
+      left: 50%;
+      transform: translateX(-50%);
+      width: 80px;
+      height: 24px;
+      background: rgba(0,0,0,0.08);
+      border-radius: 6px;
+    }
+    body.dark .postit::before { background: rgba(255,255,255,0.1); }
+
+    /* Bouton + Nouvelle note */
+    .add-note {
+      position: fixed;
+      right: 2.5rem;
+      bottom: 2.5rem;
+      width: 70px;
+      height: 70px;
+      background: linear-gradient(135deg, #007bff, #8b5cf6);
+      color: white;
+      border: none;
+      border-radius: 50%;
+      font-size: 2.5rem;
+      cursor: pointer;
+      box-shadow: 0 10px 30px rgba(0,123,255,0.4);
+      transition: all 0.3s ease;
+      z-index: 100;
+    }
+    .add-note:hover {
+      transform: scale(1.15) rotate(90deg);
+      box-shadow: 0 15px 40px rgba(0,123,255,0.5);
+    }
+  </style>
+  <link href="https://fonts.googleapis.com/css2?family=Caveat:wght@500;600;700&display=swap" rel="stylesheet">
+</head>
+<body>
+
+  <!-- HEADER PRO -->
+  <header>
+   <div class="logo">🎓 UniTasks</div>
+        <nav>
+      <ul>
+        <li><a href="index.html">Dashboard</a></li>
+        <li><a href="taches.html">Tâches</a></li>
+        <li><a href="calendrier.html">Calendrier</a></li>
+        <li><a href="stats.html">Stats</a></li>
+        <li><a href="creneaux.html">Créneaux</a></li>
+        <li><a href="plans.html">Plans de révision</a></li>
+        <li><a href="fichiers.html">Fichiers</a></li>
+        <li><a href="notes.html" class="active">Notes</a></li>
+        <li><a href="profil.html">Profil</a></li>
+        <li><a href="contact.html">Contact</a></li>
+      </ul>
+    </nav>
+    <input type="checkbox" id="theme-switch" hidden>
+
+<label for="theme-switch" class="theme-toggle">
+  <span class="sun">☀️</span>
+  <span class="moon">🌙</span>
+</label>
+  </header>
+
+  <main class="notes-container">
+    <div class="notes-header">
+      <h1>Mes Notes Rapides</h1>
+      <p style="font-size:1.4rem; color:var(--gray-400); margin-top:1rem;">
+        Idées, formules, rappels — tout reste ici
+      </p>
+    </div>
+    <div style="text-align:center;margin-bottom:2rem;">
+      <button id="addNoteBtn" style="
+        background:linear-gradient(135deg,#007bff,#8b5cf6);
+        color:white; border:none; padding:0.9rem 2rem;
+        border-radius:14px; font-size:1.1rem; font-weight:600;
+        cursor:pointer; box-shadow:0 8px 25px rgba(0,123,255,0.3);
+      ">➕ Nouvelle note</button>
+    </div>
+    <div class="notes-grid">
+
+      <!-- Zone pour écrire une nouvelle note -->
+      <div class="postit yellow">
+        <textarea placeholder="Écrivez une note rapide ici..."></textarea>
+      </div>
+
+      <!-- Notes existantes (exemples) -->
+      <div class="postit pink">
+        <strong>Examen Linux – 15 déc</strong><br><br>
+        → Revoir : systemd, LVM, SELinux<br>
+        → TP Docker obligatoire avant le 10<br>
+        → Groupe Discord : lien dans Moodle
+      </div>
+
+      <div class="postit blue">
+        Idée projet bonus :<br><br>
+        Ajouter un mode Pomodoro intégré + sons de concentration (lofi, pluie...)
+      </div>
+
+      <div class="postit green">
+        <strong>Formule importante BI</strong><br><br>
+        Coefficient de corrélation de Pearson :<br><br>
+        r = Σ((x-x̄)(y-ȳ)) / √(Σ(x-x̄)² Σ(y-ȳ)²)
+      </div>
+
+      <div class="postit purple">
+        Rappel soutenance :<br><br>
+        • Diapos : max 12<br>
+        • Demo live obligatoire<br>
+        • Q/R : 5 minutes<br>
+        • Costume recommandé
+      </div>
+
+
+    </div>
+  </main>
+
+  
+
+<footer class="modern-footer">
+  <div class="footer-center">
+
+    <h3>🎓 UniTasks</h3>
+    <p class="footer-main-text">
+      Ton espace intelligent pour organiser tes études, suivre tes tâches et rester productif chaque jour.
+    </p>
+
+    <div class="footer-features">
+      <span>📋 Organisation claire</span>
+      <span>⏱️ Productivité quotidienne</span>
+      <span>🎯 Objectifs atteints</span>
+    </div>
+
+  </div>
+
+  <div class="footer-bottom">
+    © 2025 <strong>UniTasks</strong>
+  </div>
+</footer>
+  <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+  <script src="app.js"></script>
+</body>
+</html>
